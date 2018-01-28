@@ -45,7 +45,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -56,8 +56,7 @@ class Database {
       if (err) {
         throw err;
       }
-      console.log(results);
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -90,19 +89,24 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
   // Database Insertions
   // Get information to insert into the user table
   InsertUser(callback, ...fields) {
-    const query = 'INSERT INTO users (fullname, username, email, password) VALUES (?,?,?,?)';
+    let query = '';
+    if (fields.length === 4) {
+      query = 'INSERT INTO users (fullname, username, email, password) VALUES (?,?,?,?)';
+    } else if (fields.length === 5) {
+      query = 'INSERT INTO users (fullname, username, email, password, is_admin) VALUES (?,?,?,?,?)';
+    }
     this.con.query(query, fields, (err, results) => {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -113,8 +117,7 @@ class Database {
       if (err) {
         throw err;
       }
-      console.log(results);
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -125,7 +128,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -136,7 +139,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -147,7 +150,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -158,7 +161,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 }
