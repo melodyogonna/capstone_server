@@ -1,0 +1,19 @@
+{
+  "name": "capstone-project",
+  "version": "1.0.0",
+  "description": "DevCTraining with Andela capstone project",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "author": "Melody Daniel",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.1.6-alpha.6",
+    "mysql": "^2.17.1"
+  }
+}
