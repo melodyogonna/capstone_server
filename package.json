@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "server": "node index.js",
-    "test": "mocha"
+    "test": "mocha --"
   },
   "author": "Melody Daniel",
   "license": "ISC",
