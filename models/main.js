@@ -173,21 +173,29 @@ const dropTables = (databaseName, callback, ...tables) => {
       throw err;
     }
   });
-  tables.forEach((table) => {
-    const query = `DROP TABLE IF EXISTS ${table}`;
-    const disable = 'SET foreign_key_checks = 0';
-    con.query(disable, (err) => {
-      if (err) {
-        throw err;
-      }
-      con.query(query, (error) => {
-        if (error) {
-          throw error;
+
+  ((call) => {
+    tables.forEach((table, index) => {
+      const query = `DROP TABLE IF EXISTS ${table}`;
+      const disable = 'SET foreign_key_checks = 0';
+      con.query(disable, (err) => {
+        if (err) {
+          throw err;
         }
-        console.log(`Dropped table ${table}`);
+        con.query(query, (error) => {
+          if (error) {
+            throw error;
+          }
+          console.log(`Dropped table ${table}`);
+          return call(index);
+        });
       });
-      return callback();
     });
+  })((index) => {
+    if (index < (tables.length)) {
+      console.log(`Done table with index of ${index}`);
+    }
+    return callback;
   });
 };
 
