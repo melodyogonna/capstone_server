@@ -60,18 +60,6 @@ class Database {
     });
   }
 
-  // Select First record on results
-  // Expect result to be array
-  static first(result) {
-    return result[0];
-  }
-
-  // Return Last element in record
-  // Expect result to be array
-  static last(result) {
-    return result[result.length - 1];
-  }
-
   // Select records with filter
   select(fields, tableName, where = '', groupby = '', orderby = '', callback) {
     let whr = ''; let grpby = ''; let ordby = '';
@@ -164,12 +152,47 @@ class Database {
       return callback(results);
     });
   }
+
+  // Delete a record
+  delete(tableName, fieldId, callback) {
+    const query = `UPDATE ${tableName} SET is_deleted=1 WHERE id=${fieldId}`;
+    this.con.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      callback(result);
+    });
+  }
+}
+
+// Select First record on results
+// Expect result to be array
+const first = (result) => {
+  if (result.length < 1) {
+    return undefined;
+  }
+  if (result.length === 1) {
+    return result;
+  }
+  return result[0];
+}
+
+// Return Last element in record
+// Expect result to be array
+const last = (result) => {
+  if (result.length < 1) {
+    return undefined;
+  }
+  if (result.length === 1) {
+    return result;
+  }
+  return result[result.length - 1];
 }
 
 // const Db = new Database('capstone');
 // Db.createConnection((message) => message);
 // const data = ['a gif comment', 'a date', 1, 1];
-// Db.selectAll('users', (result) => {
-//   console.log(result);
+// Db.selectAll('users', '', (result) => {
+//   console.log(Db.last(result));
 // });
-module.exports = Database;
+module.exports = { Database, first, last };
