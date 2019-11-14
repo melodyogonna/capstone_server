@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const { makeTables, dropTables } = require('../models/main');
 
 
-const ORM = require('../models/miniORM');
+const { Database: ORM } = require('../models/miniORM');
 
 const connect = new ORM('capstone_test');
 // Testing ayncronous code is really a pain
