@@ -90,5 +90,58 @@ router.get('/posts', (request, response) => {
   });
 });
 
+// Return all the Posts that is not deleted that has a specific id
+router.get('/posts/:id', (request, response) => {
+  const id = request.params.id
+  db.selectOne('posts', id, (results) => {
+    if (results.length < 1) {
+      return response.status(200).json({ status: 'success', data: [] });
+    }
+    if (results.length === 1) {
+      if (results[0].is_deleted === 1) {
+        return response.status(200).json({ status: 'success', data: [] });
+      }
+      return response.status(200).json({ status: 'success', data: results });
+    }
+  });
+});
+
+// Return all the Gifs that is not deleted that has a specific id
+router.get('/posts/:id', (request, response) => {
+  const id = request.params.id
+  db.selectOne('posts', id, (results) => {
+    if (results.length < 1) {
+      return response.status(200).json({ status: 'success', data: [] });
+    }
+    if (results.length === 1) {
+      if (results[0].is_deleted === 1) {
+        return response.status(200).json({ status: 'success', data: [] });
+      }
+      return response.status(200).json({ status: 'success', data: results });
+    }
+  });
+});
+
+// Return all the Posts Comments that is not deleted
+router.get('/postcomments/:postid', (request, response) => {
+  const postId = request.params.postId
+  db.selectAll('post_comments', `post=${postId}`, (results) => {
+    if (results.length < 1) {
+      return response.status(200).json({ status: 'success', data: [] });
+    }
+    return response.status(200).json({ status: 'success', data: results });
+  });
+});
+
+// Return all the Gifcomments Comments that is not deleted
+router.get('/gifcomments/:gifId', (request, response) => {
+  const postId = request.params.gifId
+  db.selectAll('gif_comment', `gif_post=${postId}`, (results) => {
+    if (results.length < 1) {
+      return response.status(200).json({ status: 'success', data: [] });
+    }
+    return response.status(200).json({ status: 'success', data: results });
+  });
+});
 
 module.exports = router;
