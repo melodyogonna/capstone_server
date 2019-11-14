@@ -81,7 +81,7 @@ const POST_COMMENT = `
 `;
 
 
-const makeTables = (databaseName, callback) => {
+const makeTables = (databaseName) => {
   const con = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -90,78 +90,35 @@ const makeTables = (databaseName, callback) => {
   });
 
   const tables = [USER, CATEGORY, GIF, POST, GIF_COMMENT, POST_COMMENT];
-  con.connect((error) => {
-    if (error) {
-      throw error;
-    }
-    // //  create the user table
-    // con.query(USER, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table users or table exists ...');
-    // });
-
-    // // create the category table
-    // con.query(CATEGORY, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table category or tables exists');
-    // });
-
-    // // create the gif table
-    // con.query(GIF, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table gifs or tables exists');
-    // });
-
-    // // create the posts table
-    // con.query(POST, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table posts or tables exists');
-    // });
-
-    // // create the gif comments table
-    // con.query(GIF_COMMENT, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table gif_comments or tables exists');
-    // });
-    // // create the post comments table
-    // con.query(POST_COMMENT, (err) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   console.log('Created table posts_comments or tables exists');
-    // });
-    const createTable = (call) => {
-      tables.forEach((table, index) => {
-        con.query(table, (err) => {
-          if (err) {
-            throw err;
-          }
-          console.log(`Created table ${table} or tables exists`);
-          call(index);
-        });
-      });
-    };
-    createTable((index) => {
-      if (index < (tables.length)) {
-        console.log(`Done table with index of ${index}`);
+  return new Promise((resolve, reject) => {
+    con.connect((error) => {
+      if (error) {
+        throw error;
       }
-      return callback;
+      const createTable = (call) => {
+        tables.forEach((table, index) => {
+          con.query(table, (err) => {
+            if (err) {
+              throw err;
+            }
+            console.log(`Created table ${table} or tables exists`);
+            call(index);
+          });
+        });
+      };
+      createTable((index) => {
+        if (index < (tables.length)) {
+          console.log(`Done table with index of ${index}`);
+        }
+        // eslint-disable-next-line new-cap
+        return resolve();
+      });
     });
   });
 };
 
 // drop tables
-const dropTables = (databaseName, callback, ...tables) => {
+const dropTables = (databaseName, ...tables) => {
   const con = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -174,31 +131,37 @@ const dropTables = (databaseName, callback, ...tables) => {
     }
   });
 
-  ((call) => {
-    tables.forEach((table, index) => {
-      const query = `DROP TABLE IF EXISTS ${table}`;
-      const disable = 'SET foreign_key_checks = 0';
-      con.query(disable, (err) => {
-        if (err) {
-          throw err;
-        }
-        con.query(query, (error) => {
-          if (error) {
-            throw error;
+  return new Promise((resolve, reject) => {
+    ((call) => {
+      tables.forEach((table, index) => {
+        const query = `DROP TABLE IF EXISTS ${table}`;
+        const disable = 'SET foreign_key_checks = 0';
+        con.query(disable, (err) => {
+          if (err) {
+            reject(err);
           }
-          console.log(`Dropped table ${table}`);
-          return call(index);
+          con.query(query, (error) => {
+            if (error) {
+              reject(error);
+            }
+            console.log(`Dropped table ${table}`);
+            return call(index);
+          });
         });
       });
+    })((index) => {
+      if (index < (tables.length)) {
+        console.log(`Done table with index of ${index}`);
+      }
+      return resolve();
     });
-  })((index) => {
-    if (index < (tables.length)) {
-      console.log(`Done table with index of ${index}`);
-    }
-    return callback;
   });
 };
 
-makeTables('capstone_test');
+// makeTables('capstone');
+// const tables = ['users', 'category', 'gifs', 'posts', 'gif_comment', 'post_comments'];
+// dropTables('capstone', () => {
+//   console.log('removed');
+// }, ...tables);
 
 module.exports = { makeTables, dropTables };
