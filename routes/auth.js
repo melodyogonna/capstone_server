@@ -13,7 +13,7 @@ db.createConnection(() => {
 });
 
 const router = express.Router();
-router.use(bodyparser.urlencoded());
+router.use(bodyparser.urlencoded({ extended: true }));
 
 // Handle user login. Both for admin and normal user
 router.post('/login', (request, response) => {
@@ -33,7 +33,7 @@ router.post('/login', (request, response) => {
       // compare password if user exists
       bcrypt.compare(password, user.password).then((res) => {
         if (res === true) {
-          const token = jwt.sign(user.id, 'secrets');
+          const token = jwt.sign({ data: user.id }, 'secrets', { expiresIn: 60 * 60 });
           response.status(200).json({ status: 'success', data: { token, UserId: user.id } });
         }
         response.status(400).json({ status: 'error', message: 'Wrong password' });
@@ -81,7 +81,7 @@ router.post('/admin-register', (request, response) => {
         // eslint-disable-next-line max-len
         const fields = [fullname, username, email, hash, 1];
         db.InsertUser((result) => {
-          const token = jwt.sign(result.insertId, 'secrets');
+          const token = jwt.sign({ data: result.insertId }, 'secrets', { expiresIn: 60 * 60 });
           return response.status(200).json({ status: 'success', data: { token, UserId: result.insertId } });
         }, ...fields);
       });
@@ -172,7 +172,7 @@ router.post('/register', (request, response) => {
         // eslint-disable-next-line max-len
         const fields = [fullname, username, email, hash];
         db.InsertUser((result) => {
-          const token = jwt.sign(result.insertId, 'secrets');
+          const token = jwt.sign({ data: result.insertId }, 'secrets', { expiresIn: 60 * 60 });
           return response.status(200).json({ status: 'success', data: { token, UserId: result.insertId } });
         }, ...fields);
       });
@@ -182,8 +182,6 @@ router.post('/register', (request, response) => {
   // eslint-disable-next-line consistent-return
   const validateInput = () => {
     // validation for submitted fields
-    console.log('validate user');
-    console.log(fullname)
     if (fullname === '' || username === '' || email === '' || password === '' || confirmPassword === '') {
       return response.status(400).json({ status: 'error', message: 'Please fill out every field' });
     }
@@ -204,7 +202,6 @@ router.post('/register', (request, response) => {
     }
 
     (() => {
-      console.log('chcek email');
       db.selectAll('users', `email=${mysql.escape(email)}`, (result) => {
         if (result.length > 0) {
           response.status(400).json({ status: 'error', message: 'A user with that email already exists' });
@@ -228,7 +225,7 @@ router.post('/register', (request, response) => {
   (() => {
     try {
       const userId = jwt.verify(userToken, 'secrets');
-      db.selectOne('users', userId, (result) => {
+      db.selectOne('users', userId.data, (result) => {
         const currentUser = result[0];
         if (currentUser) {
           if (currentUser.is_admin === 1) {
