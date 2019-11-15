@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 const DB = require('../models/miniORM');
 
 // Activate Database;
-const db = new DB('capstone');
+const dburl = process.env.DATABASE_URL || 'localhost';
+const db = new DB('capstone', 'root', '', dburl);
 db.createConnection(() => {
   console.log('connected to database');
 });
