@@ -52,7 +52,7 @@ describe('Testing ORM for functionality', () => {
 
   // Test context for inserting into the gifs table
   context('Insert some data into the gifs table', () => {
-    const data = ['A gif post', 'Description of gif post', `${Date.now()}`, 1, 'urls', 1];
+    const data = ['A gif post', 'Description of gif post', `'${Date.now()}'`, 1, 'urls', 1];
     it('should insert some data into the gifs table', (done) => {
       connect.InsertGif((result) => {
         expect(result.serverStatus).to.equals(2);
@@ -63,7 +63,7 @@ describe('Testing ORM for functionality', () => {
 
   // Test context for inserting into the posts table
   context('Insert some data into the posts table', () => {
-    const data = ['A post', 'Description body of post', `${Date.now()}`, 1, 1];
+    const data = ['A post', 'Description body of post', `'${Date.now()}'`, 1, 1];
     it('should insert some data into the posts table', (done) => {
       connect.InsertPost((result) => {
         expect(result.serverStatus).to.equals(2);
@@ -74,7 +74,7 @@ describe('Testing ORM for functionality', () => {
 
   // Test context for inserting into the gif comments table
   context('Insert some data into the gif comments table', () => {
-    const data = ['body of a gif comment', `${Date.now()}`, 1, 1];
+    const data = ['body of a gif comment', `'${Date.now()}'`, 1, 1];
     it('should insert some data into the gifs comment table', (done) => {
       connect.InsertGifComment((result) => {
         expect(result.serverStatus).to.equals(2);
@@ -85,7 +85,7 @@ describe('Testing ORM for functionality', () => {
 
   // Test context for inserting into the post comments table
   context('Insert some data into the post comments table', () => {
-    const data = ['body of a post comment', `${Date.now()}`, 1, 1];
+    const data = ['body of a post comment', `'${Date.now()}'`, 1, 1];
     it('should insert some data into the posts comment table', (done) => {
       connect.InsertPostComment((result) => {
         expect(result.serverStatus).to.equals(2);
