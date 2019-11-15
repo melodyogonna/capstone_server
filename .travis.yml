@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "stable"
+
+cache:
+  directories:
+    - "node_modules"
+
+services:
+  - mysql
+
+before_install:
+  - mysql -e 'CREATE DATABASE capstone;'
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: jGHAQiK1HK+0VkZL+YGQbvfYTMa8X60+hjW3RHUA7QqLQf7fnFNX5Hk1zVLWDguq8tOGAgew82hC7iuevQlpD0wmPP9kP0WXynIfKRAAber3nnUMwIrt6/wy/wlIGM+cxYaUjLyFRUYbD4oSfsfHIDBGSJKB9OlJpCl8e6oS8P+ykSwfsaaBk54b/iYawpmcrPk/AIFTNmYc5fDfwQ3zqElAejgym6pCrjHWjwHdIdlw4S1dRWEALD3qtuWxs5JnMHaEEe5mwY1lqKLS6lTb0DjYJXDgGDtGN5LXzIa8xCl+PC4rkipW/EHsKjM1uSVX4PYsCUyxguyoLSMsUUuioSunZUFd4P2C3Wgi6ikjw/4YgSmAHMnwveG2RF1COxlb8Q4P9fqFh1mA6PtQbrNYySqM3E155P0XNtZxX1L6Svc6mnqw0XlKtYQB3BfqXngvtMcs5FOIWLaQcFzQUKAvgJECJ4BTGS1qTQx3LOTsP/9wXv/IiO5ESI/Y8ddgEuv6ZpHmNgakVl4oKYmXPgeCCiWqjmDxhCdtFFq28PzUrUAFy/15I4l3JhKjKlTLdzPcw2ajVu3BBgy7S5Fewyk/vX+UUPlfmNekfIW7lgbsT+7hD63dDos6yc3sC+dzAQ6pnT3I850bqOa9evvStNHHBi4FNZngUeXhWF2JYfku96A=

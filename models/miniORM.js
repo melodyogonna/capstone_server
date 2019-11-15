@@ -45,7 +45,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -56,21 +56,8 @@ class Database {
       if (err) {
         throw err;
       }
-      console.log(results);
-      return callback(results[0]);
+      return callback(results);
     });
-  }
-
-  // Select First record on results
-  // Expect result to be array
-  static first(result) {
-    return result[0];
-  }
-
-  // Return Last element in record
-  // Expect result to be array
-  static last(result) {
-    return result[result.length - 1];
   }
 
   // Select records with filter
@@ -90,19 +77,24 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
   // Database Insertions
   // Get information to insert into the user table
   InsertUser(callback, ...fields) {
-    const query = 'INSERT INTO users (fullname, username, email, password) VALUES (?,?,?,?)';
+    let query = '';
+    if (fields.length === 4) {
+      query = 'INSERT INTO users (fullname, username, email, password) VALUES (?,?,?,?)';
+    } else if (fields.length === 5) {
+      query = 'INSERT INTO users (fullname, username, email, password, is_admin) VALUES (?,?,?,?,?)';
+    }
     this.con.query(query, fields, (err, results) => {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -113,8 +105,7 @@ class Database {
       if (err) {
         throw err;
       }
-      console.log(results);
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -125,7 +116,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -136,7 +127,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -147,7 +138,7 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
 
@@ -158,15 +149,50 @@ class Database {
       if (err) {
         throw err;
       }
-      return callback(results[0]);
+      return callback(results);
     });
   }
+
+  // Delete a record
+  delete(tableName, fieldId, callback) {
+    const query = `UPDATE ${tableName} SET is_deleted=1 WHERE id=${fieldId}`;
+    this.con.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      callback(result);
+    });
+  }
+}
+
+// Select First record on results
+// Expect result to be array
+const first = (result) => {
+  if (result.length < 1) {
+    return undefined;
+  }
+  if (result.length === 1) {
+    return result;
+  }
+  return result[0];
+}
+
+// Return Last element in record
+// Expect result to be array
+const last = (result) => {
+  if (result.length < 1) {
+    return undefined;
+  }
+  if (result.length === 1) {
+    return result;
+  }
+  return result[result.length - 1];
 }
 
 // const Db = new Database('capstone');
 // Db.createConnection((message) => message);
 // const data = ['a gif comment', 'a date', 1, 1];
-// Db.selectAll('users', (result) => {
-//   console.log(result);
+// Db.selectAll('users', '', (result) => {
+//   console.log(Db.last(result));
 // });
-module.exports = Database;
+module.exports = { Database, first, last };
