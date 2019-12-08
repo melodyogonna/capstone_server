@@ -11,6 +11,7 @@ services:
 
 before_install:
   - npm install mocha -g
+  - mysql -e 'CREATE DATABASE capstone_test;'
   - mysql -e 'CREATE DATABASE capstone;'
 
 deploy:

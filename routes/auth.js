@@ -1,10 +1,20 @@
+/**
+ * Authorize and authenticated users
+ * Authenticated users is assigned a token which needs to be appended to urls on request
+ * contains routes to:
+ * Register admins
+ * Allow admins to register other users and
+ * login
+ * Author - Anyaegbulam Melody Ogonna Daniel
+ */
+
 /* eslint-disable consistent-return */
 const express = require('express');
 const bodyparser = require('body-parser');
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const DB = require('../models/miniORM');
+const { Database: DB } = require('../models/miniORM');
 
 // Activate Database;
 const dburl = process.env.DATABASE_URL || 'localhost';
@@ -34,7 +44,7 @@ router.post('/login', (request, response) => {
       // compare password if user exists
       bcrypt.compare(password, user.password).then((res) => {
         if (res === true) {
-          const token = jwt.sign(user.id, 'secrets');
+          const token = jwt.sign({ data: user.id }, 'secrets', { expiresIn: '1h' });
           response.json({ status: 'success', data: { token, UserId: user.id } });
         }
         response.json({ status: 'error', message: 'Wrong password' });
@@ -82,7 +92,7 @@ router.post('/admin-register', (request, response) => {
         // eslint-disable-next-line max-len
         const fields = [fullname, username, email, hash, 1];
         db.InsertUser((result) => {
-          const token = jwt.sign(result.insertId, 'secrets');
+          const token = jwt.sign({ data: result.insertId }, 'secrets', { expiresIn: '1h' });
           return response.json({ status: 'success', data: { token, UserId: result.insertId } });
         }, ...fields);
       });
@@ -173,7 +183,7 @@ router.post('/register', (request, response) => {
         // eslint-disable-next-line max-len
         const fields = [fullname, username, email, hash];
         db.InsertUser((result) => {
-          const token = jwt.sign(result.insertId, 'secrets');
+          const token = jwt.sign({ data: result.insertId }, 'secrets', { expiresIn: '1h' });
           return response.json({ status: 'success', data: { token, UserId: result.insertId } });
         }, ...fields);
       });

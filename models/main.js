@@ -29,8 +29,8 @@ const GIF = `
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
             description TEXT,
-            date INT(100),
-            gif_category INT,
+            date VARCHAR(255),
+            category INT,
             url VARCHAR(255),
             author INT,
             deleted TINYINT(1) DEFAULT 0,
@@ -44,7 +44,7 @@ const POST = `
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
             body TEXT,
-            date INT(100),
+            date VARCHAR(255),
             category INT,
             author INT,
             FOREIGN KEY (category) REFERENCES category(id) ON DELETE CASCADE,
@@ -58,7 +58,7 @@ const GIF_COMMENT = `
         CREATE TABLE IF NOT EXISTS gif_comment (
             id INT AUTO_INCREMENT PRIMARY KEY,
             body TEXT,
-            date INT(100),
+            date VARCHAR(255),
             gif_post INT,
             author INT,
             FOREIGN KEY (gif_post) REFERENCES gifs(id) ON DELETE CASCADE,
@@ -72,7 +72,7 @@ const POST_COMMENT = `
         CREATE TABLE IF NOT EXISTS post_comments (
             id INT AUTO_INCREMENT PRIMARY KEY,
             body TEXT,
-            date INT(100),
+            date VARCHAR(255),
             post INT,
             author INT,
             FOREIGN KEY (post) REFERENCES posts(id) ON DELETE CASCADE,
@@ -158,7 +158,7 @@ const dropTables = (databaseName, ...tables) => {
   });
 };
 
-makeTables('capstone');
+// makeTables('capstone');
 // const tables = ['users', 'category', 'gifs', 'posts', 'gif_comment', 'post_comments'];
 // dropTables('capstone', () => {
 //   console.log('removed');
