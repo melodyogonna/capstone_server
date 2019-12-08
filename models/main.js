@@ -30,7 +30,7 @@ const GIF = `
             title VARCHAR(255) NOT NULL,
             description TEXT,
             date VARCHAR(255),
-            gif_category INT,
+            category INT,
             url VARCHAR(255),
             author INT,
             deleted TINYINT(1) DEFAULT 0,
@@ -158,7 +158,7 @@ const dropTables = (databaseName, ...tables) => {
   });
 };
 
-makeTables('capstone');
+// makeTables('capstone');
 // const tables = ['users', 'category', 'gifs', 'posts', 'gif_comment', 'post_comments'];
 // dropTables('capstone', () => {
 //   console.log('removed');

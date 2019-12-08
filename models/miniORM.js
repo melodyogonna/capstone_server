@@ -1,7 +1,8 @@
 // Mini Object Relational Mapper for this project
-// Can insert and select from databases tables, cannot create one.
+// Can insert and select from databases tables, cannot create one or delete
 // Maps only to MySQL
 // Inspiration from Django's ORM and Web2py's DAL.
+// Author - Anyaegbulam Melody Ogonna Daniel
 
 
 const mysql = require('mysql');
@@ -111,7 +112,7 @@ class Database {
 
   // Get information to insert into the gifs table
   InsertGif(callback, ...fields) {
-    const query = 'INSERT INTO gifs (title, description, date, gif_category, url, author) VALUES (?,?,?,?,?,?)';
+    const query = 'INSERT INTO gifs (title, description, date, category, url, author) VALUES (?,?,?,?,?,?)';
     this.con.query(query, fields, (err, results) => {
       if (err) {
         throw err;
@@ -153,8 +154,69 @@ class Database {
     });
   }
 
+  // Update category
+  updateCategory(id, name, callback) {
+    let query = '';
+    if (!name || typeof (name) !== 'string') {
+      throw new Error(`Field error, expect a name name to be a string, received ${typeof (name)}`);
+    }
+    if (!id || typeof (id) !== 'number') {
+      throw new Error('Field Error, Expects id to be a number');
+    }
+    query = `UPDATE category SET name=name WHERE id=${id}`;
+    this.con.query(query, (err, results) => {
+      if (err) {
+        throw err;
+      }
+      return callback(results);
+    });
+  }
+
+  // Update gifs
+  updateGif(id, fields, callback) {
+    let query = '';
+    if (!fields || fields.length < 2) {
+      throw new Error('Field error, expect a field or array of fields of length 2');
+    }
+    if (!id || typeof (id) !== 'number') {
+      throw new Error('Field Error, Expects id to be a number');
+    }
+    if (fields.length === 2) {
+      query = `UPDATE gifs SET title=${fields[0]}, description=${fields[1]} WHERE id=${id}`;
+    } else if (fields.length === 3) {
+      query = `UPDATE gifs SET title=${fields[0]}, description=${fields[1]}, url=${fields[2]} WHERE id=${id}`;
+    }
+    this.con.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      return callback(result);
+    });
+  }
+
+  // Update posts
+  updatePost(id, fields, callback) {
+    let query = '';
+    if (!fields || fields.length < 2) {
+      throw new Error('Field error, expect a field or array of fields of length 2');
+    }
+    if (!id || typeof (id) !== 'number') {
+      throw new Error('Field Error, Expects id to be a number');
+    }
+    query = `UPDATE posts SET title=${fields[0]}, body=${fields[1]} WHERE id=${id}`;
+    this.con.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      return callback(result);
+    });
+  }
+
   // Delete a record
   delete(tableName, fieldId, callback) {
+    if (!fieldId || typeof fieldId !== 'number') {
+      throw new Error('Field Error, Expects id to be a number');
+    }
     const query = `UPDATE ${tableName} SET is_deleted=1 WHERE id=${fieldId}`;
     this.con.query(query, (err, result) => {
       if (err) {
@@ -175,7 +237,7 @@ const first = (result) => {
     return result;
   }
   return result[0];
-}
+};
 
 // Return Last element in record
 // Expect result to be array
@@ -187,7 +249,7 @@ const last = (result) => {
     return result;
   }
   return result[result.length - 1];
-}
+};
 
 // const Db = new Database('capstone');
 // Db.createConnection((message) => message);

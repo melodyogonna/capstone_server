@@ -1,13 +1,16 @@
+/* eslint-disable camelcase */
 /**
- * Allow authenticated users to perform actions like:
+ * Allow authenticated users to perform less administrative actions like:
  * See Gifs posted by other employees
  * See articles posted by other employees
  * comment on Gifs posted by other employees
  * comment on articles posted by other employees
  * Get gifs based on category
+ * Author - Anyaegbulam Melody Ogonna Daniel
  */
 
 /* eslint-disable consistent-return */
+
 const express = require('express');
 const bodyparser = require('body-parser');
 const jwt = require('jsonwebtoken');
@@ -43,9 +46,9 @@ const checkToken = (request, response, next) => {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        response.status(400).json({ status: 'error', message: 'Session expired, please login again' });
-      } else if (error.name === 'JsonWebTokenError') {
-        response.status(400).json({ status: 'error', message: 'Error occured while validating user' });
+        return response.status(400).json({ status: 'error', message: 'Session expired, please login again' });
+      } if (error.name === 'JsonWebTokenError') {
+        return response.status(400).json({ status: 'error', message: 'Error occured while validating user' });
       }
     }
   })();
@@ -53,11 +56,12 @@ const checkToken = (request, response, next) => {
 
 router.use(checkToken);
 
-function author(id) {
-  return new Promise((resolve, reject) => {
+// Return author name
+async function author(id) {
+  return new Promise((resolve) => {
     db.selectOne('users', id, (result) => {
       if (result.length === 0) {
-        return resolve('none');
+        return resolve('unknown author');
       }
       const user = `${result[0].fullname}`;
       return resolve(user);
@@ -65,15 +69,45 @@ function author(id) {
   });
 }
 
+// Return category name
+function category(id) {
+  return new Promise((resolve) => {
+    db.selectOne('category', id, (result) => {
+      if (result.length === 0) {
+        return resolve('uncategorized');
+      }
+      const user = `${result[0].name}`;
+      return resolve(user);
+    });
+  });
+}
+
+// Return full details
+// eslint-disable-next-line arrow-body-style
+const fulldetails = (arr) => {
+  return new Promise((resolve) => {
+    arr.map(async (currentValue, index) => {
+      const auth = await author(currentValue.author).then((user) => user);
+      const categoryName = await category(currentValue.category).then((c) => c);
+      // eslint-disable-next-line no-param-reassign
+      currentValue.authorname = auth;
+      // eslint-disable-next-line no-param-reassign
+      currentValue.categoryName = categoryName;
+      if (index === arr.length - 1) {
+        // console.log(arr);
+        resolve(arr);
+      }
+    });
+  });
+};
+
 // Return all the GIFS that is not deleted
 router.get('/gifs', async (request, response) => {
   const cat = request.query.category;
-  const auth = author(1).then((user) => user);
-  console.log(await auth);
 
   if (cat) {
     try {
-      return db.selectAll('gifs', `gif_category=${cat}`, (results) => {
+      return db.selectAll('gifs', `gif_category=${cat}`, async (results) => {
         if (results.length < 1) {
           return response.status(200).json({ status: 'success', data: [] });
         }
@@ -81,11 +115,11 @@ router.get('/gifs', async (request, response) => {
           if (results[0].is_deleted === 1) {
             return response.status(200).json({ status: 'success', data: [] });
           }
-          return response.status(200).json({ status: 'success', data: results });
+          fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
         if (results.length > 1) {
           const data = results.filter((result) => result.is_deleted !== 1);
-          return response.status(200).json({ status: 'success', data });
+          fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
       });
     } catch (error) {
@@ -102,11 +136,11 @@ router.get('/gifs', async (request, response) => {
         if (results[0].is_deleted === 1) {
           return response.status(200).json({ status: 'success', data: [] });
         }
-        return response.status(200).json({ status: 'success', data: results });
+        fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
       if (results.length > 1) {
         const data = results.filter((result) => result.is_deleted !== 1);
-        return response.status(200).json({ status: 'success', data });
+        fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
     });
   } catch (error) {
@@ -130,11 +164,11 @@ router.get('/gifs-sorted', async (request, response) => {
           if (results[0].is_deleted === 1) {
             return response.status(200).json({ status: 'success', data: [] });
           }
-          return response.status(200).json({ status: 'success', data: results });
+          fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
         if (results.length > 1) {
           const data = results.filter((result) => result.is_deleted !== 1);
-          return response.status(200).json({ status: 'success', data });
+          fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
       });
     } catch (error) {
@@ -151,11 +185,11 @@ router.get('/gifs-sorted', async (request, response) => {
         if (results[0].is_deleted === 1) {
           return response.status(200).json({ status: 'success', data: [] });
         }
-        return response.status(200).json({ status: 'success', data: results });
+        fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
       if (results.length > 1) {
         const data = results.filter((result) => result.is_deleted !== 1);
-        return response.status(200).json({ status: 'success', data });
+        fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
     });
   } catch (error) {
@@ -168,6 +202,7 @@ router.get('/gifs-sorted', async (request, response) => {
 // Return all the Posts that is not deleted
 router.get('/posts', (request, response) => {
   const cat = request.query.category;
+  // Select by category
   if (cat) {
     try {
       return db.selectAll('posts', `category=${cat}`, (results) => {
@@ -178,11 +213,11 @@ router.get('/posts', (request, response) => {
           if (results[0].is_deleted === 1) {
             return response.status(200).json({ status: 'success', data: [] });
           }
-          return response.status(200).json({ status: 'success', data: results });
+          fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
         if (results.length > 1) {
-          const data = results.map((result) => result.is_deleted !== 1);
-          return response.status(200).json({ status: 'success', data });
+          const data = results.filter((result) => result.is_deleted !== 1);
+          fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
       });
     } catch (error) {
@@ -191,7 +226,7 @@ router.get('/posts', (request, response) => {
     }
   }
   try {
-    db.selectAll('posts', '', (results) => {
+    db.selectAll('posts', '', async (results) => {
       if (results.length < 1) {
         return response.status(200).json({ status: 'success', data: [] });
       }
@@ -199,11 +234,11 @@ router.get('/posts', (request, response) => {
         if (results[0].is_deleted === 1) {
           return response.status(200).json({ status: 'success', data: [] });
         }
-        return response.status(200).json({ status: 'success', data: results });
+        fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
       if (results.length > 1) {
-        const data = results.map((result) => result.is_deleted !== 1);
-        return response.status(200).json({ status: 'success', data });
+        const data = await results.filter((result) => result.is_deleted !== 1);
+        fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
     });
   } catch (error) {
@@ -213,8 +248,10 @@ router.get('/posts', (request, response) => {
 });
 
 // Return all the Posts ordered by Date posted that is not deleted
-router.get('/posts-sorted', (request, response) => {
+router.get('/posts-sorted', async (request, response) => {
   const cat = request.query.category;
+  const me = await author(1).then((user) => user);
+  console.log(me);
   if (cat) {
     try {
       return db.select('*', 'posts', `category=${cat}`, '', 'date ASC', (results) => {
@@ -225,11 +262,11 @@ router.get('/posts-sorted', (request, response) => {
           if (results[0].is_deleted === 1) {
             return response.status(200).json({ status: 'success', data: [] });
           }
-          return response.status(200).json({ status: 'success', data: results });
+          fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
         if (results.length > 1) {
-          const data = results.map((result) => result.is_deleted !== 1);
-          return response.status(200).json({ status: 'success', data });
+          const data = results.filter((result) => result.is_deleted !== 1);
+          fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
         }
       });
     } catch (error) {
@@ -239,7 +276,7 @@ router.get('/posts-sorted', (request, response) => {
   }
 
   try {
-    db.select('*', 'posts', '', '', 'date ASC', (results) => {
+    db.select('*', 'posts', '', '', 'date DESC', (results) => {
       if (results.length < 1) {
         return response.status(200).json({ status: 'success', data: [] });
       }
@@ -247,11 +284,11 @@ router.get('/posts-sorted', (request, response) => {
         if (results[0].is_deleted === 1) {
           return response.status(200).json({ status: 'success', data: [] });
         }
-        return response.status(200).json({ status: 'success', data: results });
+        fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
       if (results.length > 1) {
-        const data = results.map((result) => result.is_deleted !== 1);
-        return response.status(200).json({ status: 'success', data });
+        const data = results.filter((result) => result.is_deleted !== 1);
+        fulldetails(data).then((arr) => response.status(200).json({ status: 'success', data: arr }));
       }
     });
   } catch (error) {
@@ -271,7 +308,7 @@ router.get('/posts/:id', (request, response) => {
       if (results[0].is_deleted === 1) {
         return response.status(200).json({ status: 'success', data: [] });
       }
-      return response.status(200).json({ status: 'success', data: results });
+      fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
     }
   });
 });
@@ -287,7 +324,7 @@ router.get('/gifs/:id', (request, response) => {
       if (results[0].is_deleted === 1) {
         return response.status(200).json({ status: 'success', data: [] });
       }
-      return response.status(200).json({ status: 'success', data: results });
+      fulldetails(results).then((arr) => response.status(200).json({ status: 'success', data: arr }));
     }
   });
 });
